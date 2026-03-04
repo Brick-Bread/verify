@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BSMP · Verify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:        #f472d0;
+      --pink-light:  #fbb6ea;
+      --purple-dark: #3b1060;
+      --glass-bg:    rgba(15, 5, 30, 0.58);
+      --glass-border:rgba(244, 114, 208, 0.35);
+      --glow:        0 0 48px rgba(244, 114, 208, 0.4);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image: url('bg.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(5,0,15,0.65) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 28px;
+      backdrop-filter: blur(24px) saturate(1.7);
+      -webkit-backdrop-filter: blur(24px) saturate(1.7);
+      padding: 44px 40px 40px;
+      box-shadow: var(--glow), inset 0 1px 0 rgba(255,255,255,0.07);
+      text-align: center;
+      animation: floatIn 0.65s cubic-bezier(.23,1.2,.48,1) both;
+    }
+    @keyframes floatIn {
+      from { opacity:0; transform:translateY(28px) scale(0.97); }
+      to   { opacity:1; transform:translateY(0)    scale(1);    }
+    }
+
+    /* ── Logo ── */
+    .logo {
+      width: 190px;
+      filter: drop-shadow(0 0 20px rgba(244,114,208,0.75));
+      margin-bottom: 12px;
+      animation: logoPulse 4s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%,100% { filter: drop-shadow(0 0 18px rgba(244,114,208,0.7)); }
+      50%      { filter: drop-shadow(0 0 32px rgba(244,114,208,1));   }
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.98rem;
+      color: var(--pink-light);
+      opacity: 0.85;
+      margin-bottom: 30px;
+      line-height: 1.55;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+      margin-bottom: 26px;
+    }
+
+    /* ── Code display ── */
+    .code-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--pink-light);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .code-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(244,114,208,0.25);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 10px;
+    }
+    .code-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.28em;
+      text-shadow: 0 0 20px rgba(244,114,208,0.6);
+      user-select: all;
+      transition: opacity 0.3s;
+    }
+    .copy-btn {
+      background: none;
+      border: 1.5px solid rgba(244,114,208,0.4);
+      border-radius: 10px;
+      color: var(--pink-light);
+      cursor: pointer;
+      padding: 8px 10px;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover  { background: rgba(244,114,208,0.15); border-color: var(--pink); transform: scale(1.08); }
+    .copy-btn:active { transform: scale(0.95); }
+
+    /* ── Timer bar ── */
+    .timer-wrap {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .timer-track {
+      height: 5px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+    .timer-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #c026a0, #f472d0);
+      transition: width 1s linear, background 1s;
+      width: 100%;
+    }
+    .timer-text {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.04em;
+    }
+    .timer-text span { color: var(--pink-light); font-weight: 600; }
+
+    /* ── Refresh button ── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #c026a0 0%, #7c3aed 100%);
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 22px rgba(192,38,160,0.4);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn:hover  { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 28px rgba(192,38,160,0.55); }
+    .btn:active { transform: translateY(0); filter: brightness(0.95); }
+
+    /* ── Instructions ── */
+    .instructions {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 16px 18px;
+      text-align: left;
+      margin-bottom: 0;
+    }
+    .instructions p {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .instructions p:last-child { margin-bottom: 0; }
+    .instructions .step-num {
+      background: linear-gradient(135deg, #c026a0, #7c3aed);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .instructions code {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--pink-light);
+      background: rgba(244,114,208,0.12);
+      padding: 1px 6px;
+      border-radius: 5px;
+    }
+
+    /* ── Copied toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(192,38,160,0.9);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 99px;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Sparkles ── */
+    .sparkle { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .sparkle span {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--pink);
+      opacity: 0;
+      animation: twinkle var(--dur,4s) var(--delay,0s) ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity:0; transform:scale(0.5); }
+      50%      { opacity:0.6; transform:scale(1.5); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sparkle" aria-hidden="true" id="sparkles"></div>
+
+  <div class="card" role="main">
+    <img src="logo.png" alt="BSMP Logo" class="logo" />
+    <h1>Account Verification</h1>
+    <p class="subtitle">Get your code below, then enter it<br />in the Discord server to get verified.</p>
+
+    <div class="divider"></div>
+
+    <p class="code-label">Your verification code</p>
+    <div class="code-box">
+      <div class="code-value" id="codeDisplay">······</div>
+      <button class="copy-btn" id="copyBtn" title="Copy code" onclick="copyCode()">⎘</button>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      <p class="timer-text">Expires in <span id="timerText">10:00</span></p>
+    </div>
+
+    <button class="btn" onclick="generateNewCode()">↻ Generate New Code</button>
+
+    <div class="instructions">
+      <p><span class="step-num">1</span> Copy the 6-digit code above.</p>
+      <p><span class="step-num">2</span> Go to the Discord server.</p>
+      <p><span class="step-num">3</span> Type <code>/verify &lt;code&gt;</code> in any channel.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✓ Code copied!</div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────
+    //  SHARED SECRET — must exactly match VERIFY_SECRET in your .env
+    //  Change this string to something private before deploying!
+    // ─────────────────────────────────────────────────────────────
+    const SHARED_SECRET = 'CHANGE_ME_TO_SOMETHING_SECRET';
+
+    const CODE_TTL_MS   = 10 * 60 * 1000; // 10 minutes
+
+    let currentCode      = null;
+    let codeGeneratedAt  = null;
+    let timerInterval    = null;
+
+    /* ── HMAC-SHA256 in the browser via SubtleCrypto ── */
+    async function hmacCode(secret, message) {
+      const enc     = new TextEncoder();
+      const keyData = enc.encode(secret);
+      const msgData = enc.encode(message);
+      const key = await crypto.subtle.importKey(
+        'raw', keyData,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false, ['sign']
+      );
+      const sig    = await crypto.subtle.sign('HMAC', key, msgData);
+      const bytes  = new Uint8Array(sig);
+      // Take first 4 bytes, mod 1 000 000 → 6-digit code
+      const num    = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+      return String(num % 1_000_000).padStart(6, '0');
+    }
+
+    /* ── Generate a code tied to a 10-min window ── */
+    async function generateNewCode() {
+      const now    = Date.now();
+      // Window = floor(now / TTL) so the same window produces the same code
+      const window = Math.floor(now / CODE_TTL_MS);
+      const code   = await hmacCode(SHARED_SECRET, String(window));
+
+      currentCode     = code;
+      codeGeneratedAt = now;
+
+      document.getElementById('codeDisplay').textContent = code;
+      startTimer();
+    }
+
+    /* ── Countdown timer ── */
+    function startTimer() {
+      clearInterval(timerInterval);
+      const fill = document.getElementById('timerFill');
+      const text = document.getElementById('timerText');
+
+      timerInterval = setInterval(() => {
+        const elapsed  = Date.now() - codeGeneratedAt;
+        const remaining = Math.max(0, CODE_TTL_MS - elapsed);
+        const pct      = (remaining / CODE_TTL_MS) * 100;
+        const mins     = String(Math.floor(remaining / 60000)).padStart(2,'0');
+        const secs     = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
+
+        fill.style.width = pct + '%';
+        fill.style.background = pct < 20
+          ? 'linear-gradient(90deg,#dc2626,#f87171)'
+          : 'linear-gradient(90deg,#c026a0,#f472d0)';
+        text.textContent = `${mins}:${secs}`;
+
+        if (remaining === 0) {
+          clearInterval(timerInterval);
+          document.getElementById('codeDisplay').textContent = '······';
+          text.textContent = 'Expired — generate a new code';
+          currentCode = null;
+        }
+      }, 1000);
+    }
+
+    /* ── Copy to clipboard ── */
+    function copyCode() {
+      if (!currentCode) return;
+      navigator.clipboard.writeText(currentCode).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    }
+
+    /* ── Sparkles ── */
+    (function () {
+      const c = document.getElementById('sparkles');
+      for (let i = 0; i < 55; i++) {
+        const s = document.createElement('span');
+        const size = (1.5 + Math.random() * 3).toFixed(1);
+        s.style.cssText = `
+          left:${(Math.random()*100).toFixed(1)}%;
+          top:${(Math.random()*100).toFixed(1)}%;
+          width:${size}px; height:${size}px;
+          --dur:${(3+Math.random()*5).toFixed(1)}s;
+          --delay:${(Math.random()*7).toFixed(1)}s;
+        `;
+        c.appendChild(s);
+      }
+    })();
+
+    // Auto-generate on load
+    generateNewCode();
+  </script>
+</body>
+</html>
